@@ -452,13 +452,112 @@ app.get('/api/sessions/:id/handoff', async (c) => {
   const sessionId = c.req.param('id')
 
   try {
+    // Get session details
+    const session = await DB.prepare('SELECT * FROM sessions WHERE id = ?').bind(sessionId).first()
+    
+    if (!session) {
+      return c.json({ success: false, error: 'Session not found' }, 404)
+    }
+    
+    // Get handoff
     const handoff = await DB.prepare('SELECT * FROM handoffs WHERE session_id = ?').bind(sessionId).first()
     
     if (!handoff) {
       return c.json({ success: false, error: 'Handoff not found' }, 404)
     }
 
-    return c.json({ success: true, handoff })
+    // Generate formatted handoff document
+    const handoffDocument = `# 🎯 SESSION HANDOFF #${session.session_number.toString().padStart(3, '0')}
+## ${session.title}
+
+**Project ID**: ${session.project_id}
+**Session**: #${session.session_number}
+**Status**: ${session.status}
+**Date**: ${new Date(session.completed_at || session.created_at).toLocaleDateString()}
+**Credits**: ${session.credit_used}/${session.credit_budget}
+**Duration**: ${session.duration_minutes || 'N/A'} minutes
+**Efficiency**: ${session.efficiency ? (session.efficiency * 100).toFixed(1) + '%' : 'N/A'}
+
+---
+
+## 📋 ACCOMPLISHMENTS
+
+${session.accomplishments || 'No accomplishments recorded.'}
+
+---
+
+## 🗃️ CURRENT STATE
+
+${handoff.current_state}
+
+---
+
+## 📊 ACTUAL STATE
+
+${handoff.actual_state}
+
+---
+
+## ✅ REQUIREMENTS CHECKLIST
+
+${handoff.requirements_checklist}
+
+---
+
+## 🚧 BLOCKERS & ISSUES
+
+${session.blockers || 'No blockers encountered.'}
+
+---
+
+## 🔧 TROUBLESHOOTING
+
+${session.troubleshooting || 'No troubleshooting required.'}
+
+---
+
+## 🚀 NEXT STEPS
+
+${handoff.next_steps}
+
+---
+
+## 💡 FUTURE RECOMMENDATIONS
+
+${handoff.future_recommendations || 'No recommendations at this time.'}
+
+---
+
+**Version**: ${handoff.version}
+**Context Quality**: ${(handoff.context_quality * 100).toFixed(0)}%
+**Requirements Completion**: ${(handoff.requirements_completion_rate * 100).toFixed(0)}%
+**Generated**: ${new Date(handoff.created_at).toISOString()}
+`
+
+    return c.json({ 
+      success: true, 
+      handoff,
+      session_number: session.session_number,
+      handoff_document: handoffDocument
+    })
+  } catch (error) {
+    return c.json({ success: false, error: String(error) }, 500)
+  }
+})
+
+// Get Single Session
+app.get('/api/sessions/:id', async (c) => {
+  const { DB } = c.env
+  const sessionId = c.req.param('id')
+
+  try {
+    const session = await DB.prepare('SELECT * FROM sessions WHERE id = ?').bind(sessionId).first()
+    
+    if (!session) {
+      return c.json({ success: false, error: 'Session not found' }, 404)
+    }
+
+    return c.json({ success: true, session })
   } catch (error) {
     return c.json({ success: false, error: String(error) }, 500)
   }
