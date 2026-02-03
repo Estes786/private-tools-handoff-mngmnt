@@ -1,0 +1,16 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "handoff-management",
+  "compatibility_date": "2026-02-03",
+  "pages_build_output_dir": "./dist",
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "handoff-management-production",
+      "database_id": "placeholder-will-be-created"
+    }
+  ]
+}

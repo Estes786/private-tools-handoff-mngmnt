@@ -1,0 +1,35 @@
+{
+  "name": "handoff-management",
+  "version": "1.0.0",
+  "description": "Infinity Growth Loop Handoff Management System",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "dev:sandbox": "wrangler pages dev dist --ip 0.0.0.0 --port 3000",
+    "dev:d1": "wrangler pages dev dist --d1=handoff-management-production --local --ip 0.0.0.0 --port 3000",
+    "build": "vite build",
+    "preview": "wrangler pages dev dist",
+    "deploy": "npm run build && wrangler pages deploy dist",
+    "deploy:prod": "npm run build && wrangler pages deploy dist --project-name handoff-management",
+    "cf-typegen": "wrangler types --env-interface CloudflareBindings",
+    "db:create:local": "mkdir -p .wrangler/state/v3/d1",
+    "db:migrate:local": "wrangler d1 migrations apply handoff-management-production --local",
+    "db:migrate:prod": "wrangler d1 migrations apply handoff-management-production",
+    "db:console:local": "wrangler d1 execute handoff-management-production --local",
+    "db:console:prod": "wrangler d1 execute handoff-management-production",
+    "clean-port": "fuser -k 3000/tcp 2>/dev/null || true",
+    "test": "curl http://localhost:3000",
+    "git:init": "git init && git add . && git commit -m 'Initial commit'",
+    "git:commit": "git add . && git commit -m",
+    "git:push": "git push origin main"
+  },
+  "dependencies": {
+    "hono": "^4.11.7"
+  },
+  "devDependencies": {
+    "@hono/vite-build": "^1.2.0",
+    "@hono/vite-dev-server": "^0.18.2",
+    "vite": "^6.3.5",
+    "wrangler": "^4.4.0"
+  }
+}
